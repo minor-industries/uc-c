@@ -88,6 +88,21 @@ void setup() {
     radio->setPowerLevel(23);
 }
 
+void packFloat(float floatVal, uint8_t *buf) {
+    union {
+        float float_val;
+        uint8_t bytes[4];
+    } value{
+            .float_val =  floatVal
+    };
+
+    buf[0] = value.bytes[0];
+    buf[1] = value.bytes[1];
+    buf[2] = value.bytes[2];
+    buf[3] = value.bytes[3];
+}
+
+
 void loop() {
     sensors_event_t humidity, temp;
     aht.getEvent(&humidity, &temp);
@@ -95,7 +110,11 @@ void loop() {
     int tInt = int(temp.temperature);
     blink(tInt, 25, 75);
 
-    uint8_t buf[] = {0xAA, 0xBB, 0xCC, 0xDD};
+    uint8_t buf[9];
+    buf[0] = 0x01;
+
+    packFloat(temp.temperature, buf + 1);
+    packFloat(humidity.relative_humidity, buf + 5);
 
     radio->send(
             0x02,
