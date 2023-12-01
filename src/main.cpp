@@ -84,6 +84,8 @@ void setup() {
     if (!radio->initialize(RF69_433MHZ, 0xC0, 100)) {
         blinkForever(500, 100);
     }
+
+    radio->setPowerLevel(23);
 }
 
 void loop() {
@@ -92,6 +94,13 @@ void loop() {
 
     int tInt = int(temp.temperature);
     blink(tInt, 25, 75);
+
+    uint8_t buf[] = {0xAA, 0xBB, 0xCC, 0xDD};
+
+    radio->send(
+            0x02,
+            buf,
+            sizeof(buf));
 
     sleep(5000);
 }
