@@ -107,8 +107,7 @@ void loop() {
     sensors_event_t humidity, temp;
     aht.getEvent(&humidity, &temp);
 
-    int tInt = int(temp.temperature);
-    blink(tInt, 25, 75);
+    blink(1, 25, 10);
 
     uint8_t buf[9];
     buf[0] = 0x01;
@@ -120,6 +119,8 @@ void loop() {
             0x02,
             buf,
             sizeof(buf));
+
+    radio->setMode(RF69_MODE_SLEEP);
 
     sleep(5000);
 }
