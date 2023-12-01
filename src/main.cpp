@@ -1,12 +1,42 @@
 #include <Arduino.h>
 #include "Adafruit_NeoPixel.h"
+#include "ArduinoLowPower.h"
+#include "Adafruit_AHTX0.h"
 
-#define LED_PIN 0 // Change this to the pin you connected your LED to
+#define LED_PIN 0
 #define NEO_POWER 12
 #define NEO 11
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(1, NEO, NEO_GRB + NEO_KHZ800);
+Adafruit_AHTX0 aht;
 
+void on() {
+    strip.setPixelColor(0, 0xFF0000);
+    strip.show();
+}
+
+void off() {
+    strip.setPixelColor(0, 0x000000);
+    strip.show();
+}
+
+void blink(int repeat, int high, int low) {
+    for (int i = 0; i < repeat; ++i) {
+        on();
+        delay(high);
+        off();
+        delay(low);
+    }
+}
+
+void blinkForever(int high, int low) {
+    while (true) {
+        on();
+        delay(high);
+        off();
+        delay(low);
+    }
+}
 
 void setup() {
     pinMode(LED_PIN, OUTPUT);
@@ -22,21 +52,21 @@ void setup() {
 
     strip.setPixelColor(0, 0xFF0000);
     strip.show();
-}
 
-void on() {
-    strip.setPixelColor(0, 0xFF0000);
-    strip.show();
-}
-
-void off() {
-    strip.setPixelColor(0, 0x000000);
-    strip.show();
+    if (!aht.begin()) {
+        blinkForever(1000, 1000);
+    } else {
+        blink(3, 50, 250);
+    }
 }
 
 void loop() {
     on();
-    delay(1000); // Wait for 1 second
+    delay(25);
     off();
-    delay(1000);
+    delay(5000);
+
+    LowPower.sleep(5000);
 }
+
+
