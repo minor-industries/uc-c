@@ -2,6 +2,8 @@
 #include "Adafruit_NeoPixel.h"
 #include "ArduinoLowPower.h"
 #include "Adafruit_AHTX0.h"
+#include "RFM69.h"
+#include <SPI.h>
 
 #define LED_PIN 0
 #define NEO_POWER 12
@@ -9,6 +11,10 @@
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(1, NEO, NEO_GRB + NEO_KHZ800);
 Adafruit_AHTX0 aht;
+
+RFM69 *radio;
+
+//SPIClass SPI1(PERIPH_SPI);
 
 
 unsigned long startTime;
@@ -53,6 +59,9 @@ void sleep(int sleepMillis) {
 void setup() {
     startTime = millis();
 
+    g_APinDescription;
+
+
     pinMode(LED_PIN, OUTPUT);
     pinMode(NEO_POWER, OUTPUT);
     digitalWrite(NEO_POWER, HIGH);
@@ -68,6 +77,12 @@ void setup() {
         blinkForever(1000, 1000);
     } else {
         blink(3, 250, 250);
+    }
+
+    radio = new RFM69(0, 1, true, &SPI);
+
+    if (!radio->initialize(RF69_433MHZ, 0xC0, 100)) {
+        blinkForever(500, 100);
     }
 }
 
