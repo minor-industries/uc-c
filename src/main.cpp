@@ -10,6 +10,9 @@
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(1, NEO, NEO_GRB + NEO_KHZ800);
 Adafruit_AHTX0 aht;
 
+
+unsigned long startTime;
+
 void on() {
     strip.setPixelColor(0, 0xFF0000);
     strip.show();
@@ -38,35 +41,43 @@ void blinkForever(int high, int low) {
     }
 }
 
-void setup() {
-    pinMode(LED_PIN, OUTPUT);
+void sleep(int sleepMillis) {
+    bool upAndRunning = millis() - startTime > 30000;
+    if (upAndRunning) {
+        LowPower.sleep(sleepMillis);
+    } else {
+        delay(sleepMillis);
+    }
+}
 
+void setup() {
+    startTime = millis();
+
+    pinMode(LED_PIN, OUTPUT);
     pinMode(NEO_POWER, OUTPUT);
     digitalWrite(NEO_POWER, HIGH);
-
     pinMode(NEO, OUTPUT);
 
     strip.begin();
     strip.setBrightness(50);
     strip.show();
 
-    strip.setPixelColor(0, 0xFF0000);
-    strip.show();
+    blink(25, 25, 175);
 
     if (!aht.begin()) {
         blinkForever(1000, 1000);
     } else {
-        blink(3, 50, 250);
+        blink(3, 250, 250);
     }
 }
 
 void loop() {
-    on();
-    delay(25);
-    off();
-    delay(5000);
+    sensors_event_t humidity, temp;
+    aht.getEvent(&humidity, &temp);
 
-    LowPower.sleep(5000);
+    int tInt = int(temp.temperature);
+    blink(tInt, 25, 75);
+
+    sleep(5000);
 }
-
 
