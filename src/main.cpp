@@ -24,9 +24,19 @@ void setup() {
     strip.show();
 }
 
+void on() {
+    strip.setPixelColor(0, 0xFF0000);
+    strip.show();
+}
+
+void off() {
+    strip.setPixelColor(0, 0x000000);
+    strip.show();
+}
+
 void loop() {
-    digitalWrite(LED_PIN, HIGH); // Turn the LED on
+    on();
     delay(1000); // Wait for 1 second
-    digitalWrite(LED_PIN, LOW); // Turn the LED off
+    off();
     delay(1000);
 }
