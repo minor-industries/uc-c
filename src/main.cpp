@@ -88,14 +88,15 @@ void readTemp() {
             0x02,
             buf,
             sizeof(buf));
-
-    radio->setMode(RF69_MODE_SLEEP);
-
-    sleep(5000);
 }
 
 void readCurrent() {
-    blinkForever(25, 25);
+    float v = ina219->getBusVoltage_V();
+    float i = ina219->getCurrent_mA();
+    float p = ina219->getCurrent_mA();
+
+    int vInt = int(v);
+    blink(vInt, 25, 475);
 }
 
 
@@ -107,6 +108,10 @@ void loop() {
     if (ina219 != null) {
         readCurrent();
     }
+
+    radio->setMode(RF69_MODE_SLEEP);
+
+    sleep(5000);
 }
 
 
