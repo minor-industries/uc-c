@@ -13,4 +13,6 @@ void blink(int repeat, int high, int low);
 
 void blinkForever(int high, int low);
 
+void packFloat(float floatVal, uint8_t *buf);
+
 #endif
