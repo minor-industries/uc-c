@@ -19,6 +19,15 @@ RFM69 *radio;
 
 unsigned long startTime;
 
+bool after(unsigned long timeInSeconds) {
+    unsigned long timeInMillis = timeInSeconds * 1000;
+    return (millis() - startTime) > timeInMillis;
+}
+
+bool before(unsigned long timeInSeconds) {
+    return !after(timeInSeconds);
+}
+
 void on() {
     strip.setPixelColor(0, 0xFF0000);
     strip.show();
@@ -48,8 +57,7 @@ void blinkForever(int high, int low) {
 }
 
 void sleep(int sleepMillis) {
-    bool upAndRunning = millis() - startTime > 30000;
-    if (upAndRunning) {
+    if (after(30)) {
         LowPower.sleep(sleepMillis);
     } else {
         delay(sleepMillis);
@@ -61,7 +69,6 @@ void setup() {
 
     g_APinDescription;
 
-
     pinMode(LED_PIN, OUTPUT);
     pinMode(NEO_POWER, OUTPUT);
     digitalWrite(NEO_POWER, HIGH);
@@ -71,7 +78,9 @@ void setup() {
     strip.setBrightness(50);
     strip.show();
 
-    blink(25, 25, 175);
+    if (before(60)) {
+        blink(25, 25, 175);
+    }
 
     if (!aht.begin()) {
         blinkForever(1000, 1000);
