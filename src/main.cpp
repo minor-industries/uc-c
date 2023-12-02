@@ -12,7 +12,8 @@
 #define NEO_POWER 12
 
 
-Adafruit_AHTX0 aht;
+Adafruit_AHTX0 *aht;
+Adafruit_INA219 *ina219;
 RFM69 *radio;
 extern unsigned long startTime;
 extern Adafruit_NeoPixel *strip;
@@ -40,10 +41,19 @@ void setup() {
 
     blink(25, 25, 175);
 
-    if (!aht.begin()) {
-        blinkForever(1000, 1000);
+    aht = new Adafruit_AHTX0();
+    ina219 = new Adafruit_INA219(0x41);
+
+    if (!aht->begin()) {
+        aht = null;
     } else {
         blink(3, 250, 250);
+    }
+
+    if (!ina219->begin()) {
+        aht = null;
+    } else {
+        blink(4, 50, 250);
     }
 
     radio = new RFM69(0, 1, true, &SPI);
@@ -57,9 +67,11 @@ void setup() {
 
 int blinkCount = 10;
 
-void loop() {
+void readCurrent();
+
+void readTemp() {
     sensors_event_t humidity, temp;
-    aht.getEvent(&humidity, &temp);
+    aht->getEvent(&humidity, &temp);
 
     if (blinkCount > 0) {
         blink(1, 25, 10);
@@ -81,4 +93,20 @@ void loop() {
 
     sleep(5000);
 }
+
+void readCurrent() {
+    blinkForever(25, 25);
+}
+
+
+void loop() {
+    if (aht != null) {
+        readTemp();
+    }
+
+    if (ina219 != null) {
+        readCurrent();
+    }
+}
+
 
