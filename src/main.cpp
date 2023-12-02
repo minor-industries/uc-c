@@ -1,86 +1,44 @@
 #include <Arduino.h>
-#include "Adafruit_NeoPixel.h"
 #include "ArduinoLowPower.h"
 #include "Adafruit_AHTX0.h"
 #include "RFM69.h"
 #include <SPI.h>
+#include "Adafruit_INA219.h"
+#include "Adafruit_NeoPixel.h"
+#include "util.h"
 
-#define LED_PIN 0
-#define NEO_POWER 12
+
 #define NEO 11
+#define NEO_POWER 12
 
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(1, NEO, NEO_GRB + NEO_KHZ800);
+
 Adafruit_AHTX0 aht;
-
 RFM69 *radio;
+extern unsigned long startTime;
+extern Adafruit_NeoPixel *strip;
 
-//SPIClass SPI1(PERIPH_SPI);
-
-
-unsigned long startTime;
-
-bool after(unsigned long timeInSeconds) {
-    unsigned long timeInMillis = timeInSeconds * 1000;
-    return (millis() - startTime) > timeInMillis;
-}
-
-bool before(unsigned long timeInSeconds) {
-    return !after(timeInSeconds);
-}
-
-void on() {
-    strip.setPixelColor(0, 0xFF0000);
-    strip.show();
-}
-
-void off() {
-    strip.setPixelColor(0, 0x000000);
-    strip.show();
-}
-
-void blink(int repeat, int high, int low) {
-    for (int i = 0; i < repeat; ++i) {
-        on();
-        delay(high);
-        off();
-        delay(low);
-    }
-}
-
-void blinkForever(int high, int low) {
-    while (true) {
-        on();
-        delay(high);
-        off();
-        delay(low);
-    }
-}
 
 void sleep(int sleepMillis) {
     if (after(30)) {
         LowPower.sleep(sleepMillis);
-    } else {
+    } else
         delay(sleepMillis);
-    }
 }
 
 void setup() {
     startTime = millis();
 
-    g_APinDescription;
+    strip = new Adafruit_NeoPixel(1, NEO, NEO_GRB + NEO_KHZ800);
 
-    pinMode(LED_PIN, OUTPUT);
-    pinMode(NEO_POWER, OUTPUT);
+    pinMode(strip->getPin(), OUTPUT);
     digitalWrite(NEO_POWER, HIGH);
     pinMode(NEO, OUTPUT);
 
-    strip.begin();
-    strip.setBrightness(50);
-    strip.show();
+    strip->begin();
+    strip->setBrightness(50);
+    strip->show();
 
-    if (before(60)) {
-        blink(25, 25, 175);
-    }
+    blink(25, 25, 175);
 
     if (!aht.begin()) {
         blinkForever(1000, 1000);
@@ -112,11 +70,16 @@ void packFloat(float floatVal, uint8_t *buf) {
 }
 
 
+int blinkCount = 10;
+
 void loop() {
     sensors_event_t humidity, temp;
     aht.getEvent(&humidity, &temp);
 
-    blink(1, 25, 10);
+    if (blinkCount > 0) {
+        blink(1, 25, 10);
+        blinkCount--;
+    }
 
     uint8_t buf[9];
     buf[0] = 0x01;
