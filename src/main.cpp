@@ -55,7 +55,7 @@ void setup() {
     }
 
     if (!ina219->begin()) {
-        aht = null;
+        ina219 = null;
     } else {
         blink(4, 50, 250);
     }
@@ -94,13 +94,11 @@ void readPower() {
     float i = ina219->getCurrent_mA();
     float p = ina219->getCurrent_mA();
 
-    uint8_t buf[1 + 1 + 4 + 4 + 16];
+    uint8_t buf[1 + 4 + 4 + 4 + 1 + 16];
     memset(buf, 0, sizeof(buf));
 
     uint8_t *pos = buf;
     pos[0] = 0x03;
-    pos += 1;
-    pos[0] = INA219_ADDR;
     pos += 1;
 
     packFloat(v, pos);
@@ -111,6 +109,9 @@ void readPower() {
 
     packFloat(p, pos);
     pos += 4;
+
+    pos[0] = INA219_ADDR;
+    pos += 1;
 
     const char *description = "test-11";
     memcpy(pos, description, strlen(description));
