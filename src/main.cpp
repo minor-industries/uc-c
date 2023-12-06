@@ -4,11 +4,14 @@
 #include "RFM69.h"
 #include <SPI.h>
 #include "Adafruit_INA219.h"
+#include "Adafruit_MCP9600.h"
 
 #include "util.h"
 
 
 #define INA219_ADDR 0x41
+#define MCP9600_ADDR 0x60
+
 
 #define RADIO_SRC_ADDR 0xC2
 #define RADIO_DST_ADDR 0x02
@@ -22,6 +25,8 @@
 
 Adafruit_AHTX0 *aht;
 Adafruit_INA219 *ina219;
+Adafruit_MCP9600 *mcp;
+
 RFM69 *radio;
 extern unsigned long startTime;
 
@@ -44,19 +49,26 @@ void setup() {
 
     blink(25, 25, 175);
 
-    aht = new Adafruit_AHTX0();
-    ina219 = new Adafruit_INA219(INA219_ADDR);
 
+    aht = new Adafruit_AHTX0();
     if (!aht->begin()) {
         aht = null;
     } else {
         blink(3, 250, 250);
     }
 
+    ina219 = new Adafruit_INA219(INA219_ADDR);
     if (!ina219->begin()) {
         ina219 = null;
     } else {
         blink(4, 50, 250);
+    }
+
+    mcp = new Adafruit_MCP9600();
+    if (!mcp->begin(MCP9600_ADDR)) {
+        mcp = null;
+    } else {
+        blink(5, 50, 250);
     }
 
     pinMode(22, OUTPUT);
