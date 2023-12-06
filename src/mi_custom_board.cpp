@@ -1,9 +1,8 @@
-#if defined(ADAFRUIT_TRINKET_M0)
+#if defined(MI_CUSTOM_BOARD)
 
 #include <Arduino.h>
 
-#define LED_PIN 3
-
+#define LED_PIN 7
 
 void setupLED() {
     g_APinDescription;
@@ -17,6 +16,5 @@ void on() {
 void off() {
     digitalWrite(LED_PIN, LOW);
 }
-
 
 #endif

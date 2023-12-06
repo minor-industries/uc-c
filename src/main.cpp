@@ -36,6 +36,8 @@ void sleep(int sleepMillis) {
 }
 
 void setup() {
+    g_APinDescription;
+
     startTime = millis();
 
     setupLED();

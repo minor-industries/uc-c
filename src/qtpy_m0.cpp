@@ -1,6 +1,6 @@
-#if defined(ADAFRUIT_QTPY_M0)
+#if defined(ADAFRUIT_QTPY_M0) && !defined(MI_CUSTOM_BOARD)
 
-#include "Adafruit_NeoPixel.h
+#include "Adafruit_NeoPixel.h"
 
 #define NEO 11
 #define NEO_POWER 12
