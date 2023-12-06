@@ -59,7 +59,11 @@ void setup() {
         blink(4, 50, 250);
     }
 
-    radio = new RFM69(0, 1, true, &SPI);
+    pinMode(22, OUTPUT);
+    digitalWrite(22, LOW);
+
+    // TODO: get working with real qt_py again
+    radio = new RFM69(21, 23, true, &SPI);
 
     if (!radio->initialize(RF69_433MHZ, RADIO_SRC_ADDR, 100)) {
         blinkForever(500, 100);
