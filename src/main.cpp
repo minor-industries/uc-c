@@ -104,6 +104,26 @@ void readTemp() {
     radio->send(RADIO_DST_ADDR, buf, sizeof(buf));
 }
 
+void readThermocouple() {
+    float t = mcp->readThermocouple();
+
+    uint8_t buf[1 + 4 + 16];
+    memset(buf, 0, sizeof(buf));
+
+    uint8_t *pos = buf;
+
+    pos[0] = 0x02;
+    pos += 1;
+
+    packFloat(t, pos);
+    pos += 4;
+
+    const char *description = "bbq01-bbq";
+    memcpy(pos, description, strlen(description));
+
+    radio->send(RADIO_DST_ADDR, buf, sizeof(buf));
+}
+
 void readPower() {
     float v = ina219->getBusVoltage_V();
     float i = ina219->getCurrent_mA();
@@ -142,6 +162,10 @@ void loop() {
 
     if (ina219 != null) {
         readPower();
+    }
+
+    if (mcp != null) {
+        readThermocouple();
     }
 
     radio->setMode(RF69_MODE_SLEEP);
