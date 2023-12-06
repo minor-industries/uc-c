@@ -10,7 +10,7 @@
 
 #define INA219_ADDR 0x41
 
-#define RADIO_SRC_ADDR 0xC1
+#define RADIO_SRC_ADDR 0xC2
 #define RADIO_DST_ADDR 0x02
 
 #if defined(ADAFRUIT_QTPY_M0)
