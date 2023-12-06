@@ -4,23 +4,28 @@
 #include "RFM69.h"
 #include <SPI.h>
 #include "Adafruit_INA219.h"
-#include "Adafruit_NeoPixel.h"
+
 #include "util.h"
 
 
-#define NEO 11
-#define NEO_POWER 12
 #define INA219_ADDR 0x41
 
 #define RADIO_SRC_ADDR 0xC1
 #define RADIO_DST_ADDR 0x02
+
+#if defined(ADAFRUIT_QTPY_M0)
+
+#elif defined(ADAFRUIT_TRINKET_M0)
+
+#endif
 
 
 Adafruit_AHTX0 *aht;
 Adafruit_INA219 *ina219;
 RFM69 *radio;
 extern unsigned long startTime;
-extern Adafruit_NeoPixel *strip;
+
+void setupLED();
 
 
 void sleep(int sleepMillis) {
@@ -33,15 +38,7 @@ void sleep(int sleepMillis) {
 void setup() {
     startTime = millis();
 
-    strip = new Adafruit_NeoPixel(1, NEO, NEO_GRB + NEO_KHZ800);
-
-    pinMode(strip->getPin(), OUTPUT);
-    digitalWrite(NEO_POWER, HIGH);
-    pinMode(NEO, OUTPUT);
-
-    strip->begin();
-    strip->setBrightness(50);
-    strip->show();
+    setupLED();
 
     blink(25, 25, 175);
 
