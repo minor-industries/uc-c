@@ -84,16 +84,11 @@ void setup() {
     radio->setPowerLevel(23);
 }
 
-int blinkCount = 10;
 
 void readTemp() {
     sensors_event_t humidity, temp;
     aht->getEvent(&humidity, &temp);
 
-    if (blinkCount > 0) {
-        blink(1, 25, 10);
-        blinkCount--;
-    }
 
     uint8_t buf[9];
     buf[0] = 0x01;
@@ -155,7 +150,15 @@ void readPower() {
 }
 
 
+int blinkCount = 10;
+
 void loop() {
+    if (blinkCount > 0) {
+        blink(1, 25, 10);
+        blinkCount--;
+    }
+
+
     if (aht != null) {
         readTemp();
     }
