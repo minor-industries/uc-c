@@ -1,27 +1,19 @@
 #include <Arduino.h>
-#include "ArduinoLowPower.h"
 #include "Adafruit_AHTX0.h"
 #include "RFM69.h"
-#include <SPI.h>
 #include "Adafruit_INA219.h"
 #include "Adafruit_MCP9600.h"
-
+#include "board.h"
 #include "util.h"
 
+#define ALLOW_DEEP_SLEEP false
+#define ENABLE_I2C true
 
 #define INA219_ADDR 0x41
 #define MCP9600_ADDR 0x60
 
-
 #define RADIO_SRC_ADDR 0xC2
 #define RADIO_DST_ADDR 0x02
-
-#if defined(ADAFRUIT_QTPY_M0)
-
-#elif defined(ADAFRUIT_TRINKET_M0)
-
-#endif
-
 
 Adafruit_AHTX0 *aht;
 Adafruit_INA219 *ina219;
@@ -29,39 +21,28 @@ Adafruit_MCP9600 *mcp;
 
 RFM69 *radio;
 extern unsigned long startTime;
-
-void setupLED();
-
-bool detectI2c(TwoWire *wire);
-
-
-void sleep(int sleepMillis) {
-    if (after(30)) {
-        LowPower.sleep(sleepMillis);
-    } else
-        delay(sleepMillis);
-}
+extern Board board;
 
 void setupDevices() {
     aht = new Adafruit_AHTX0();
     if (!aht->begin()) {
         aht = null;
     } else {
-        blink(3, 250, 250);
+        board.blink(3, 250, 250);
     }
 
     ina219 = new Adafruit_INA219(INA219_ADDR);
     if (!ina219->begin()) {
         ina219 = null;
     } else {
-        blink(4, 50, 250);
+        board.blink(4, 50, 250);
     }
 
     mcp = new Adafruit_MCP9600();
     if (!mcp->begin(MCP9600_ADDR)) {
         mcp = null;
     } else {
-        blink(5, 50, 250);
+        board.blink(5, 50, 250);
     }
 }
 
@@ -72,22 +53,24 @@ void setup() {
 
     startTime = millis();
 
-    setupLED();
+    board.setup();
 
-    blink(25, 25, 175);
+    board.blink(25, 25, 175);
 
-    if (detectI2c(&Wire)) {
-        setupDevices();
-    }
+#if ENABLE_I2C
+    setupDevices();
+#endif
 
-    pinMode(22, OUTPUT);
-    digitalWrite(22, LOW);
+    board.resetRadio();
 
-    // TODO: get working with real qt_py again
-    radio = new RFM69(21, 23, true, &SPI);
+    radio = new RFM69(
+            board.radioCsPin,
+            board.radioInterruptPin,
+            true,
+            board.spi());
 
     if (!radio->initialize(RF69_433MHZ, RADIO_SRC_ADDR, 100)) {
-        blinkForever(500, 100);
+        board.blinkForever(500, 100);
     }
 
     radio->setPowerLevel(23);
@@ -161,9 +144,10 @@ void readPower() {
 
 int blinkCount = 10;
 
+
 void loop() {
     if (blinkCount > 0) {
-        blink(1, 25, 10);
+        board.blink(1, 25, 10);
         blinkCount--;
     }
 
@@ -182,7 +166,7 @@ void loop() {
 
     radio->setMode(RF69_MODE_SLEEP);
 
-    sleep(5000);
+    sleep(ALLOW_DEEP_SLEEP, 5000);
 }
 
 

@@ -1,11 +1,8 @@
 #include "Adafruit_NeoPixel.h"
+#include "ArduinoLowPower.h"
 
 
 unsigned long startTime;
-
-void on();
-
-void off();
 
 
 bool after(unsigned long timeInSeconds) {
@@ -17,24 +14,13 @@ bool before(unsigned long timeInSeconds) {
     return !after(timeInSeconds);
 }
 
-
-void blink(int repeat, int high, int low) {
-    for (int i = 0; i < repeat; ++i) {
-        on();
-        delay(high);
-        off();
-        delay(low);
-    }
+void sleep(bool allowDeep, int sleepMillis) {
+    if (allowDeep && after(30)) {
+        LowPower.sleep(sleepMillis);
+    } else
+        delay(sleepMillis);
 }
 
-void blinkForever(int high, int low) {
-    while (true) {
-        on();
-        delay(high);
-        off();
-        delay(low);
-    }
-}
 
 void packFloat(float floatVal, uint8_t *buf) {
     union {

@@ -5,6 +5,8 @@ bool after(unsigned long timeInSeconds);
 
 bool before(unsigned long timeInSeconds);
 
+void sleep(bool allowDeep, int sleepMillis);
+
 void on();
 
 void off();
