@@ -32,6 +32,8 @@ extern unsigned long startTime;
 
 void setupLED();
 
+bool detectI2c(TwoWire *wire);
+
 
 void sleep(int sleepMillis) {
     if (after(30)) {
@@ -40,16 +42,7 @@ void sleep(int sleepMillis) {
         delay(sleepMillis);
 }
 
-void setup() {
-    g_APinDescription;
-
-    startTime = millis();
-
-    setupLED();
-
-    blink(25, 25, 175);
-
-
+void setupDevices() {
     aht = new Adafruit_AHTX0();
     if (!aht->begin()) {
         aht = null;
@@ -69,6 +62,22 @@ void setup() {
         mcp = null;
     } else {
         blink(5, 50, 250);
+    }
+}
+
+
+void setup() {
+    g_APinDescription;
+    Serial.begin(9600);
+
+    startTime = millis();
+
+    setupLED();
+
+    blink(25, 25, 175);
+
+    if (detectI2c(&Wire)) {
+        setupDevices();
     }
 
     pinMode(22, OUTPUT);
