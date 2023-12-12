@@ -12,7 +12,7 @@
 #define INA219_ADDR 0x41
 #define MCP9600_ADDR 0x60
 
-#define RADIO_SRC_ADDR 0xC2
+#define RADIO_SRC_ADDR 0xC4
 #define RADIO_DST_ADDR 0x02
 
 Adafruit_AHTX0 *aht;
