@@ -3,10 +3,11 @@
 #include "RFM69.h"
 #include "Adafruit_INA219.h"
 #include "Adafruit_MCP9600.h"
+#include "Adafruit_ADS1X15.h"
 #include "board.h"
 #include "util.h"
 
-#define ALLOW_DEEP_SLEEP true
+#define ALLOW_DEEP_SLEEP false
 #define ENABLE_I2C true
 
 #define INA219_ADDR 0x41
@@ -18,6 +19,7 @@
 Adafruit_AHTX0 *aht;
 Adafruit_INA219 *ina219;
 Adafruit_MCP9600 *mcp;
+Adafruit_ADS1115 *ads1115;
 
 RFM69 *radio;
 extern unsigned long startTime;
@@ -43,6 +45,13 @@ void setupDevices() {
         mcp = null;
     } else {
         board.blink(5, 50, 250);
+    }
+
+    ads1115 = new Adafruit_ADS1115();
+    if (ads1115->begin()) {
+        board.blink(6, 50, 250);
+    } else {
+        mcp = null;
     }
 }
 
@@ -145,6 +154,8 @@ void readPower() {
 int blinkCount = 10;
 
 
+void readADC();
+
 void loop() {
     if (blinkCount > 0) {
         board.blink(1, 25, 10);
@@ -164,9 +175,24 @@ void loop() {
         readThermocouple();
     }
 
+    if (ads1115 != null) {
+        readADC();
+    }
+
     radio->setMode(RF69_MODE_SLEEP);
 
     sleep(ALLOW_DEEP_SLEEP, 5000);
+}
+
+void readADC() {
+    int16_t counts = ads1115->readADC_SingleEnded(0);
+    float v = ads1115->computeVolts(counts);
+
+    String info;
+    info += "t = " + String(millis()) + "ms ";;
+    info += " ";
+    info += "v = " + String(v, 4);
+    Serial.println(info);
 }
 
 
