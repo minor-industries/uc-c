@@ -49,6 +49,7 @@ void setupDevices() {
 
     ads1115 = new Adafruit_ADS1115();
     if (ads1115->begin()) {
+        ads1115->setGain(GAIN_ONE);
         board.blink(6, 50, 250);
     } else {
         mcp = null;
@@ -185,14 +186,37 @@ void loop() {
 }
 
 void readADC() {
-    int16_t counts = ads1115->readADC_SingleEnded(0);
-    float v = ads1115->computeVolts(counts);
+    int16_t counts[4];
+    counts[0] = ads1115->readADC_SingleEnded(0);
+    counts[1] = ads1115->readADC_SingleEnded(1);
+    const float r_ref = 20000;
 
-    String info;
-    info += "t = " + String(millis()) + "ms ";;
-    info += " ";
-    info += "v = " + String(v, 4);
-    Serial.println(info);
+
+    for (int i = 0; i < 2; ++i) {
+        int16_t counts = ads1115->readADC_SingleEnded(i);
+        float v = ads1115->computeVolts(counts);
+
+        String info;
+        info += "t = " + String(millis()) + "ms";;
+        info += " ";
+
+        info += "channel = " + String(i);
+        info += " ";
+
+        info += "counts = " + String(counts);
+        info += " ";
+
+        info += "v = " + String(v, 4);
+        Serial.println(info);
+    }
+
+    String summary;
+    float r = float(counts[0]) / float(counts[1]) * r_ref - r_ref;
+
+    summary += "r = " + String(r / 1000.0) + "k";
+    summary += "\n";
+
+    Serial.println(summary);
 }
 
 
