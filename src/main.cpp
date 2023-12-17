@@ -6,6 +6,7 @@
 #include "Adafruit_ADS1X15.h"
 #include "board.h"
 #include "util.h"
+#include "cmath"
 
 #define ALLOW_DEEP_SLEEP false
 #define ENABLE_I2C true
@@ -185,6 +186,22 @@ void loop() {
     sleep(ALLOW_DEEP_SLEEP, 5000);
 }
 
+float shModel(float r) {
+    // https://www.thinksrs.com/downloads/programs/therm%20calc/ntccalibrator/ntccalculator.html
+
+    const float A = 0.6875638699e-3f;
+    const float B = 2.215599769e-4f;
+    const float C = 0.8187742954e-7f;
+
+    float lnR = std::log(r);
+    float t_inv = A + B * lnR + C * std::pow(lnR, 3);
+
+    float tK = 1.0f / t_inv;
+    float tC = tK - 273.15f;
+    return tC;
+}
+
+
 void readADC() {
     int16_t counts[4];
     counts[0] = ads1115->readADC_SingleEnded(0);
@@ -210,13 +227,22 @@ void readADC() {
         Serial.println(info);
     }
 
-    String summary;
     float r = float(counts[0]) / float(counts[1]) * r_ref - r_ref;
+    float tC = shModel(r);
+    float tF = tC * 9.0 / 5.0 + 32;
 
+    String summary;
     summary += "r = " + String(r / 1000.0) + "k";
+    summary += " ";
+
+    summary += "t = " + String(tC) + "C";
+    summary += " ";
+
+    summary += "t = " + String(tF) + "F";
     summary += "\n";
 
     Serial.println(summary);
 }
+
 
 
