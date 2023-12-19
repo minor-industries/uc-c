@@ -206,10 +206,11 @@ void readADC() {
     int16_t counts[4];
     counts[0] = ads1115->readADC_SingleEnded(0);
     counts[1] = ads1115->readADC_SingleEnded(1);
+    counts[2] = ads1115->readADC_SingleEnded(2);
     const float r_ref = 20000;
 
 
-    for (int i = 0; i < 2; ++i) {
+    for (int i = 0; i < 3; ++i) {
         int16_t counts = ads1115->readADC_SingleEnded(i);
         float v = ads1115->computeVolts(counts);
 
@@ -227,21 +228,24 @@ void readADC() {
         Serial.println(info);
     }
 
-    float r = float(counts[0]) / float(counts[1]) * r_ref - r_ref;
-    float tC = shModel(r);
-    float tF = tC * 9.0 / 5.0 + 32;
+    for (int i = 1; i < 3; ++i) {
+        float r = float(counts[0]) / float(counts[i]) * r_ref - r_ref;
+        float tC = shModel(r);
+        float tF = tC * 9.0f / 5.0f + 32.0f;
 
-    String summary;
-    summary += "r = " + String(r / 1000.0) + "k";
-    summary += " ";
+        String summary;
+        summary += "r = " + String(r / 1000.0) + "k";
+        summary += " ";
 
-    summary += "t = " + String(tC) + "C";
-    summary += " ";
+        summary += "t = " + String(tC) + "C";
+        summary += " ";
 
-    summary += "t = " + String(tF) + "F";
-    summary += "\n";
+        summary += "t = " + String(tF) + "F";
 
-    Serial.println(summary);
+        Serial.println(summary);
+    }
+
+    Serial.println("");
 }
 
 
