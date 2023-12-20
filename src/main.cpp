@@ -178,6 +178,7 @@ void loop() {
         Datum D;
         memset(&D, 0, sizeof(D));
         readADC(ads1115, &D);
+        printADC(&D);
     }
 
     radio->setMode(RF69_MODE_SLEEP);

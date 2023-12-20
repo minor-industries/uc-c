@@ -24,6 +24,34 @@ void readADC(Adafruit_ADS1115 *ads1115, Datum *D) {
         D->channels[i].V = ads1115->computeVolts(D->channels[i].counts);
     }
 
+    // actual temperature channels
+    for (int i = 1; i < 3; ++i) {
+        Channel *ch0 = &D->channels[0];
+        Channel *ch = &D->channels[i];
+        const float r_ref = 20000;
+
+        float r = float(ch0->counts) / float(ch->counts) * r_ref - r_ref;
+
+        if (r < 1e3 || r > 1e6) {
+            ch->present = false;
+            continue;
+        }
+
+        ch->present = true;
+        ch->R = r;
+        ch->T = shModel(r);
+    }
+
+    // battery
+    {
+        Channel *ch = &D->channels[3];
+        float v = ads1115->computeVolts(D->channels[3].counts);
+        v *= 2; // voltage divider
+        ch->V = v;
+    }
+}
+
+void printADC(Datum *D) {
     for (int i = 0; i < 4; ++i) {
         Channel *ch = &D->channels[i];
         String info;
@@ -42,28 +70,20 @@ void readADC(Adafruit_ADS1115 *ads1115, Datum *D) {
 
     // actual temperature channels
     for (int i = 1; i < 3; ++i) {
+        Channel *ch = &D->channels[i];
         String summary;
         summary += "channel " + String(i);
         summary += " ";
 
-        Channel *ch0 = &D->channels[0];
-        Channel *ch = &D->channels[i];
-        const float r_ref = 20000;
-
-        float r = float(ch0->counts) / float(ch->counts) * r_ref - r_ref;
-
-        if (r < 1e3 || r > 1e6) {
-            ch->present = false;
+        if (!ch->present) {
             summary += "no probe";
             Serial.println(summary);
             continue;
         }
 
-        ch->present = true;
-        ch->T = shModel(r);
         float tF = ch->T * 9.0f / 5.0f + 32.0f;
 
-        summary += "r = " + String(r / 1000.0) + "k";
+        summary += "r = " + String(ch->R / 1000.0) + "k";
         summary += " ";
 
         summary += "t = " + String(ch->T) + "C";
@@ -76,12 +96,10 @@ void readADC(Adafruit_ADS1115 *ads1115, Datum *D) {
 
     // battery
     {
-        float v = ads1115->computeVolts(D->channels[3].counts);
-        v *= 2; // voltage divider
-
+        Channel *ch = &D->channels[3];
         String info;
         info += "v_bat = ";
-        info += String(v);
+        info += String(ch->V);
         Serial.println(info);
     }
 
