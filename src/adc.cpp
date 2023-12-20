@@ -1,4 +1,5 @@
 #include "adc.h"
+#include "util.h"
 
 float shModel(float r) {
     // https://www.thinksrs.com/downloads/programs/therm%20calc/ntccalibrator/ntccalculator.html
@@ -105,3 +106,54 @@ void printADC(Datum *D) {
 
     Serial.println("");
 }
+
+void sendTemp(RFM69 *radio, uint16_t toAddr, Channel *ch, char const *desc) {
+    uint8_t buf[1 + 4 + 16];
+    memset(buf, 0, sizeof(buf));
+
+    uint8_t *pos = buf;
+
+    pos[0] = 0x02;
+    pos += 1;
+
+    packFloat(ch->T, pos);
+    pos += 4;
+
+    memcpy(pos, desc, strlen(desc)); // TODO: limit length
+    radio->send(toAddr, buf, sizeof(buf));
+}
+
+void sendBat(RFM69 *radio, uint16_t toAddr, Channel *ch, char const *desc) {
+    uint8_t buf[1 + 4 + 4 + 4 + 1 + 16];
+    memset(buf, 0, sizeof(buf));
+
+    uint8_t *pos = buf;
+    pos[0] = 0x03;
+    pos += 1;
+
+    packFloat(ch->V, pos);
+    pos += 4;
+
+    // TODO: consider NaN, or some way to specify absence
+    packFloat(0, pos);
+    pos += 4;
+
+    packFloat(0, pos);
+    pos += 4;
+
+    pos[0] = 0;
+    pos += 1;
+
+    memcpy(pos, desc, strlen(desc)); // TODO: limit length
+
+    radio->send(toAddr, buf, sizeof(buf));
+}
+
+
+void sendADC(RFM69 *radio, uint16_t toAddr, Datum *D) {
+    sendTemp(radio, toAddr, &D->channels[1], "bbq01-air");
+    sendTemp(radio, toAddr, &D->channels[2], "bbq01-meat");
+    sendBat(radio, toAddr, &D->channels[3], "bbq01");
+}
+
+

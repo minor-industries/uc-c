@@ -179,6 +179,9 @@ void loop() {
         memset(&D, 0, sizeof(D));
         readADC(ads1115, &D);
         printADC(&D);
+        if (radio) {
+            sendADC(radio, RADIO_DST_ADDR, &D);
+        }
     }
 
     radio->setMode(RF69_MODE_SLEEP);

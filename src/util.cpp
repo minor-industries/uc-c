@@ -1,3 +1,6 @@
+#ifndef UNTITLED_UTIL_H
+#define UNTITLED_UTIL_H
+
 #include "Adafruit_NeoPixel.h"
 #include "ArduinoLowPower.h"
 
@@ -36,3 +39,4 @@ void packFloat(float floatVal, uint8_t *buf) {
     buf[3] = value.bytes[3];
 }
 
+#endif // UNTITLED_UTIL_H
