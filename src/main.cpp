@@ -201,18 +201,35 @@ float shModel(float r) {
     return tC;
 }
 
+typedef struct {
+    bool present;
+    int16_t counts;
+    float V;
+    float T;
+} Channel;
+
+
+typedef struct {
+    Channel channels[4];
+} Datum;
+
 
 void readADC() {
-    int16_t counts[4];
-    counts[0] = ads1115->readADC_SingleEnded(0);
-    counts[1] = ads1115->readADC_SingleEnded(1);
-    counts[2] = ads1115->readADC_SingleEnded(2);
-    counts[3] = ads1115->readADC_SingleEnded(3);
-    const float r_ref = 20000;
+    Datum D;
+    memset(&D, 0, sizeof(D));
+
 
     for (int i = 0; i < 4; ++i) {
-        float v = ads1115->computeVolts(counts[i]);
+        D.channels[i].counts = ads1115->readADC_SingleEnded(i);
+    }
 
+    for (int i = 0; i < 4; ++i) {
+        D.channels[i].V = ads1115->computeVolts(D.channels[i].counts);
+    }
+
+
+    for (int i = 0; i < 4; ++i) {
+        Channel *ch = &D.channels[i];
         String info;
         info += "t = " + String(millis()) + "ms";;
         info += " ";
@@ -220,24 +237,28 @@ void readADC() {
         info += "channel = " + String(i);
         info += " ";
 
-        info += "counts = " + String(counts[i]);
+        info += "counts = " + String(ch->counts);
         info += " ";
 
-        info += "v = " + String(v, 4);
+        info += "v = " + String(ch->V, 4);
         Serial.println(info);
     }
 
-    // actual channels
+    // actual temperature channels
     for (int i = 1; i < 3; ++i) {
-        float r = float(counts[0]) / float(counts[i]) * r_ref - r_ref;
-        float tC = shModel(r);
-        float tF = tC * 9.0f / 5.0f + 32.0f;
+        Channel *ch0 = &D.channels[0];
+        Channel *ch = &D.channels[i];
+        const float r_ref = 20000;
+
+        float r = float(ch0->counts) / float(ch->counts) * r_ref - r_ref;
+        ch->T = shModel(r);
+        float tF = ch->T * 9.0f / 5.0f + 32.0f;
 
         String summary;
         summary += "r = " + String(r / 1000.0) + "k";
         summary += " ";
 
-        summary += "t = " + String(tC) + "C";
+        summary += "t = " + String(ch->T) + "C";
         summary += " ";
 
         summary += "t = " + String(tF) + "F";
@@ -247,7 +268,7 @@ void readADC() {
 
     // battery
     {
-        float v = ads1115->computeVolts(counts[3]);
+        float v = ads1115->computeVolts(D.channels[3].counts);
         v *= 2; // voltage divider
 
         String info;
