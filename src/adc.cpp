@@ -108,6 +108,9 @@ void printADC(Datum *D) {
 }
 
 void sendTemp(RFM69 *radio, uint16_t toAddr, Channel *ch, char const *desc) {
+    if (!ch->present) {
+        return;
+    }
     uint8_t buf[1 + 4 + 16];
     memset(buf, 0, sizeof(buf));
 
