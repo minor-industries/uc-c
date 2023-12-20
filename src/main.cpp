@@ -207,12 +207,11 @@ void readADC() {
     counts[0] = ads1115->readADC_SingleEnded(0);
     counts[1] = ads1115->readADC_SingleEnded(1);
     counts[2] = ads1115->readADC_SingleEnded(2);
+    counts[3] = ads1115->readADC_SingleEnded(3);
     const float r_ref = 20000;
 
-
-    for (int i = 0; i < 3; ++i) {
-        int16_t counts = ads1115->readADC_SingleEnded(i);
-        float v = ads1115->computeVolts(counts);
+    for (int i = 0; i < 4; ++i) {
+        float v = ads1115->computeVolts(counts[i]);
 
         String info;
         info += "t = " + String(millis()) + "ms";;
@@ -221,13 +220,14 @@ void readADC() {
         info += "channel = " + String(i);
         info += " ";
 
-        info += "counts = " + String(counts);
+        info += "counts = " + String(counts[i]);
         info += " ";
 
         info += "v = " + String(v, 4);
         Serial.println(info);
     }
 
+    // actual channels
     for (int i = 1; i < 3; ++i) {
         float r = float(counts[0]) / float(counts[i]) * r_ref - r_ref;
         float tC = shModel(r);
@@ -243,6 +243,17 @@ void readADC() {
         summary += "t = " + String(tF) + "F";
 
         Serial.println(summary);
+    }
+
+    // battery
+    {
+        float v = ads1115->computeVolts(counts[3]);
+        v *= 2; // voltage divider
+
+        String info;
+        info += "v_bat = ";
+        info += String(v);
+        Serial.println(info);
     }
 
     Serial.println("");
