@@ -155,7 +155,9 @@ void sendBat(RFM69 *radio, uint16_t toAddr, Channel *ch, char const *desc) {
 
 void sendADC(RFM69 *radio, uint16_t toAddr, Datum *D) {
     sendTemp(radio, toAddr, &D->channels[1], "bbq01-bbq");
+    sleep(false, 50);
     sendTemp(radio, toAddr, &D->channels[2], "bbq01-meat");
+    sleep(false, 50);
     sendBat(radio, toAddr, &D->channels[3], "bbq01");
 }
 
