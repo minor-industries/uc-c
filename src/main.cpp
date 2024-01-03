@@ -4,12 +4,14 @@
 #include "Adafruit_INA219.h"
 #include "Adafruit_MCP9600.h"
 #include "Adafruit_ADS1X15.h"
+#include "Adafruit_MAX31856.h"
+
 #include "board.h"
 #include "util.h"
 #include "adc.h"
 
-#define ALLOW_DEEP_SLEEP true
-#define ENABLE_I2C true
+#define ALLOW_DEEP_SLEEP false
+#define ENABLE_I2C false
 
 #define INA219_ADDR 0x41
 #define MCP9600_ADDR 0x60
@@ -21,12 +23,23 @@ Adafruit_AHTX0 *aht;
 Adafruit_INA219 *ina219;
 Adafruit_MCP9600 *mcp;
 Adafruit_ADS1115 *ads1115;
+Adafruit_MAX31856 *max31856;
+
 
 RFM69 *radio;
 extern unsigned long startTime;
 extern Board board;
 
-void setupDevices() {
+void setupSPIDevices() {
+    max31856 = new Adafruit_MAX31856(0);
+    if (max31856->begin()) {
+        board.blink(50, 25, 25);
+    } else {
+        max31856 = null;
+    }
+}
+
+void setupI2CDevices() {
     aht = new Adafruit_AHTX0();
     if (!aht->begin()) {
         aht = null;
@@ -69,8 +82,9 @@ void setup() {
     board.blink(25, 25, 175);
 
 #if ENABLE_I2C
-    setupDevices();
+    setupI2CDevices();
 #endif
+    setupSPIDevices();
 
     board.resetRadio();
 
@@ -156,7 +170,9 @@ void readPower() {
 int blinkCount = 10;
 
 
-void loop() {
+void monitorThermocouple();
+
+void sendToRadio() {
     if (blinkCount > 0) {
         board.blink(1, 25, 10);
         blinkCount--;
@@ -189,6 +205,21 @@ void loop() {
     sleep(ALLOW_DEEP_SLEEP, 5000);
 }
 
+void monitorThermocouple() {
+    uint8_t fault = max31856->readFault();
+    if (fault) {
+        Serial.println(String("FAULT ") + fault);
+        return;
+    }
 
+    float temp = max31856->readThermocoupleTemperature();
+    Serial.println(String("TEMP ") + String(temp));
 
+    sleep(false, 250);
+}
+
+void loop() {
+//    sendToRadio();
+    monitorThermocouple();
+}
 
