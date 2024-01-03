@@ -8,7 +8,7 @@
 #include "util.h"
 #include "adc.h"
 
-#define ALLOW_DEEP_SLEEP false
+#define ALLOW_DEEP_SLEEP true
 #define ENABLE_I2C true
 
 #define INA219_ADDR 0x41
