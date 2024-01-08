@@ -11,7 +11,7 @@
 #include "adc.h"
 
 #define ALLOW_DEEP_SLEEP false
-#define ENABLE_I2C false
+#define ENABLE_I2C true
 
 #define INA219_ADDR 0x41
 #define MCP9600_ADDR 0x60
@@ -219,7 +219,7 @@ void monitorThermocouple() {
 }
 
 void loop() {
-//    sendToRadio();
-    monitorThermocouple();
+    sendToRadio();
+//    monitorThermocouple();
 }
 
