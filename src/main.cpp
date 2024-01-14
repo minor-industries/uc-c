@@ -5,6 +5,7 @@
 #include "Adafruit_MCP9600.h"
 #include "Adafruit_ADS1X15.h"
 #include "Adafruit_MAX31856.h"
+#include "Adafruit_SHT4x.h"
 
 #include "board.h"
 #include "util.h"
@@ -24,6 +25,7 @@ Adafruit_INA219 *ina219;
 Adafruit_MCP9600 *mcp;
 Adafruit_ADS1115 *ads1115;
 Adafruit_MAX31856 *max31856;
+Adafruit_SHT4x *sht41;
 
 
 RFM69 *radio;
@@ -66,7 +68,16 @@ void setupI2CDevices() {
         ads1115->setGain(GAIN_ONE);
         board.blink(6, 50, 250);
     } else {
-        mcp = null;
+        ads1115 = null;
+    }
+
+    sht41 = new Adafruit_SHT4x();
+    if (sht41->begin()) {
+        Serial.println("found sht");
+        board.blink(7, 50, 250);
+    } else {
+        Serial.println("didn't find sht");
+        sht41 = null;
     }
 }
 
@@ -172,7 +183,10 @@ int blinkCount = 10;
 
 void monitorThermocouple();
 
+void readSht41(Adafruit_SHT4x *pX);
+
 void sendToRadio() {
+    Serial.println("sendToRadio()");
     if (blinkCount > 0) {
         board.blink(1, 25, 10);
         blinkCount--;
@@ -191,6 +205,7 @@ void sendToRadio() {
     }
 
     if (ads1115 != null) {
+        Serial.println("read ADC");
         Datum D;
         memset(&D, 0, sizeof(D));
         readADC(ads1115, &D);
@@ -200,9 +215,24 @@ void sendToRadio() {
         }
     }
 
+    if (sht41 != null) {
+        readSht41(sht41);
+    }
+
     radio->setMode(RF69_MODE_SLEEP);
 
     sleep(ALLOW_DEEP_SLEEP, 5000);
+}
+
+void readSht41(Adafruit_SHT4x *sht) {
+    Serial.println("readSht41()");
+    sensors_event_t humidity, temp;
+
+    uint32_t timestamp = millis();
+    sht->getEvent(&humidity, &temp);// populate temp and humidity objects with fresh data
+    timestamp = millis() - timestamp;
+
+    Serial.println(String("temp: ") + String(temp.temperature));
 }
 
 void monitorThermocouple() {
