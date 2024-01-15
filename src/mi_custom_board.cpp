@@ -3,7 +3,7 @@
 #include <Arduino.h>
 #include "board.h"
 
-#define LED_PIN 11
+#define LED_PIN 13
 
 void Board::setup() {
     g_APinDescription;

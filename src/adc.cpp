@@ -155,11 +155,11 @@ void sendBat(RFM69 *radio, uint16_t toAddr, Channel *ch, char const *desc) {
 
 void sendADC(RFM69 *radio, uint16_t toAddr, Datum *D) {
     for (int i = 0; i < 3; ++i) {
-        sendTemp(radio, toAddr, &D->channels[1], "bbq01-bbq");
+        sendTemp(radio, toAddr, &D->channels[1], "bbq02-bbq");
         sleep(false, 25);
-        sendTemp(radio, toAddr, &D->channels[2], "bbq01-meat");
+        sendTemp(radio, toAddr, &D->channels[2], "bbq02-meat");
         sleep(false, 25);
-        sendBat(radio, toAddr, &D->channels[3], "bbq01");
+        sendBat(radio, toAddr, &D->channels[3], "bbq02");
         sleep(false, 25);
     }
 }
