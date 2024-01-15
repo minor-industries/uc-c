@@ -11,13 +11,13 @@
 #include "util.h"
 #include "adc.h"
 
-#define ALLOW_DEEP_SLEEP false
+#define ALLOW_DEEP_SLEEP true
 #define ENABLE_I2C true
 
 #define INA219_ADDR 0x41
 #define MCP9600_ADDR 0x60
 
-#define RADIO_SRC_ADDR 0xC5
+#define RADIO_SRC_ADDR 0xC6
 #define RADIO_DST_ADDR 0x02
 
 Adafruit_AHTX0 *aht;
