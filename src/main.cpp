@@ -6,6 +6,7 @@
 #include "Adafruit_ADS1X15.h"
 #include "Adafruit_MAX31856.h"
 #include "Adafruit_SHT4x.h"
+#include <SpritzCipher.h>
 
 #include "board.h"
 #include "util.h"
@@ -26,6 +27,7 @@ Adafruit_MCP9600 *mcp;
 Adafruit_ADS1115 *ads1115;
 Adafruit_MAX31856 *max31856;
 Adafruit_SHT4x *sht41;
+spritz_ctx the_ctx;
 
 
 RFM69 *radio;
@@ -85,6 +87,9 @@ void setupI2CDevices() {
 void setup() {
     g_APinDescription;
     Serial.begin(9600);
+
+    const uint8_t key[] = {RADIO_SRC_ADDR};
+    spritz_setup(&the_ctx, key, sizeof(key));
 
     startTime = millis();
 
@@ -221,7 +226,9 @@ void sendToRadio() {
 
     radio->setMode(RF69_MODE_SLEEP);
 
-    sleep(ALLOW_DEEP_SLEEP, 5000);
+    uint32_t sleepMillis = spritz_random32_uniform(&the_ctx, 1000) + 4500;
+    Serial.println(String("delay ") + String((int32_t) sleepMillis));
+    sleep(ALLOW_DEEP_SLEEP, (int32_t) sleepMillis);
 }
 
 void readSht41(Adafruit_SHT4x *sht) {
