@@ -88,6 +88,7 @@ void setup() {
     g_APinDescription;
     Serial.begin(9600);
 
+    // this doesn't have to be secure, just don't want to collide with other radios
     const uint8_t key[] = {RADIO_SRC_ADDR};
     spritz_setup(&the_ctx, key, sizeof(key));
 

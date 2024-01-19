@@ -17,11 +17,20 @@ bool before(unsigned long timeInSeconds) {
     return !after(timeInSeconds);
 }
 
+void busySleep(int sleepMillis) {
+    unsigned long end = millis() + sleepMillis;
+
+    while (millis() < end) {
+        // busy wait
+    }
+}
+
 void sleep(bool allowDeep, int sleepMillis) {
     if (allowDeep && after(30)) {
         LowPower.sleep(sleepMillis);
-    } else
-        delay(sleepMillis);
+    } else {
+        busySleep(sleepMillis);
+    }
 }
 
 
