@@ -12,8 +12,9 @@
 #include "util.h"
 #include "adc.h"
 
-#define ALLOW_DEEP_SLEEP true
+#define ALLOW_DEEP_SLEEP false
 #define ENABLE_I2C true
+#define ENABLE_SPI false
 
 #define INA219_ADDR 0x41
 #define MCP9600_ADDR 0x60
@@ -101,7 +102,10 @@ void setup() {
 #if ENABLE_I2C
     setupI2CDevices();
 #endif
+
+#if ENABLE_SPI
     setupSPIDevices();
+#endif
 
     board.resetRadio();
 
@@ -244,20 +248,26 @@ void readSht41(Adafruit_SHT4x *sht) {
 }
 
 void monitorThermocouple() {
-    uint8_t fault = max31856->readFault();
-    if (fault) {
-        Serial.println(String("FAULT ") + fault);
-        return;
+    sleep(false, 250);
+
+    if (max31856) {
+        uint8_t fault = max31856->readFault();
+        if (fault) {
+            Serial.println(String("FAULT ") + fault);
+        } else {
+            float temp = max31856->readThermocoupleTemperature();
+            Serial.println(String("TEMP ") + String(temp));
+        }
     }
 
-    float temp = max31856->readThermocoupleTemperature();
-    Serial.println(String("TEMP ") + String(temp));
-
-    sleep(false, 250);
+    if (mcp) {
+        float temp = mcp->readThermocouple();
+        Serial.println(String("TEMP ") + String(temp));
+    }
 }
 
 void loop() {
-    sendToRadio();
-//    monitorThermocouple();
+//    sendToRadio();
+    monitorThermocouple();
 }
 
