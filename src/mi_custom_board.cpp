@@ -6,7 +6,6 @@
 #define LED_PIN 13
 
 void Board::setup() {
-    g_APinDescription;
     pinMode(LED_PIN, OUTPUT);
 }
 

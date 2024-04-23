@@ -1,7 +1,6 @@
 #ifndef UNTITLED_UTIL_H
 #define UNTITLED_UTIL_H
 
-#include "Adafruit_NeoPixel.h"
 #include "ArduinoLowPower.h"
 
 
