@@ -2,6 +2,7 @@
 #include "RFM69.h"
 #include "Adafruit_ADS1X15.h"
 #include <SpritzCipher.h>
+#include <string>
 
 #include "board.h"
 #include "util.h"
@@ -12,6 +13,8 @@
 
 #define RADIO_SRC_ADDR 0xC6
 #define RADIO_DST_ADDR 0x02
+
+const String description = "bbq01";
 
 Adafruit_ADS1115 *ads1115;
 spritz_ctx the_ctx;
@@ -68,20 +71,21 @@ int blinkCount = 10;
 
 
 void sendToRadio() {
-    Serial.println("sendToRadio()");
+    const String info = "description: " + description;
+    Serial.println(info);
+
     if (blinkCount > 0) {
         board.blink(1, 25, 10);
         blinkCount--;
     }
 
     if (ads1115 != null) {
-        Serial.println("read ADC");
         Datum D;
         memset(&D, 0, sizeof(D));
         readADC(ads1115, &D);
         printADC(&D);
         if (radio) {
-            sendADC(radio, RADIO_DST_ADDR, &D);
+            sendADC(radio, RADIO_DST_ADDR, &D, description);
         }
     }
 

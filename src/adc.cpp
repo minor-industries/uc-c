@@ -126,7 +126,7 @@ void sendTemp(RFM69 *radio, uint16_t toAddr, Channel *ch, char const *desc) {
     radio->send(toAddr, buf, sizeof(buf));
 }
 
-void sendBat(RFM69 *radio, uint16_t toAddr, Channel *ch, char const *desc) {
+void sendBattery(RFM69 *radio, uint16_t toAddr, Channel *ch, char const *desc) {
     uint8_t buf[1 + 4 + 4 + 4 + 1 + 16];
     memset(buf, 0, sizeof(buf));
 
@@ -152,14 +152,13 @@ void sendBat(RFM69 *radio, uint16_t toAddr, Channel *ch, char const *desc) {
     radio->send(toAddr, buf, sizeof(buf));
 }
 
-
-void sendADC(RFM69 *radio, uint16_t toAddr, Datum *D) {
+void sendADC(RFM69 *radio, uint16_t toAddr, Datum *D, const String &description) {
     for (int i = 0; i < 3; ++i) {
-        sendTemp(radio, toAddr, &D->channels[1], "bbq03-bbq");
+        sendTemp(radio, toAddr, &D->channels[1], (description + "-bbq").c_str());
         sleep(false, 25);
-        sendTemp(radio, toAddr, &D->channels[2], "bbq03-meat");
+        sendTemp(radio, toAddr, &D->channels[2], (description + "-meat").c_str());
         sleep(false, 25);
-        sendBat(radio, toAddr, &D->channels[3], "bbq03");
+        sendBattery(radio, toAddr, &D->channels[3], description.c_str());
         sleep(false, 25);
     }
 }
